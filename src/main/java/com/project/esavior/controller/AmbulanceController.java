@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/ambulances")
 public class AmbulanceController {
 
+
     @Autowired
     private AmbulanceService ambulanceService;
 
