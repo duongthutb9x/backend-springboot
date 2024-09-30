@@ -5,43 +5,43 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class DriverWebSocketHandler extends TextWebSocketHandler {
 
-    private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
+    private final Set<WebSocketSession> sessions = new HashSet<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
-        System.out.println("New connection established: " + session.getId());
+        System.out.println("Driver connected: " + session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("Message received: " + message.getPayload());
+        System.out.println("Received message from driver: " + message.getPayload());
 
-        // Gửi tin nhắn tới tất cả các client
+        // Gửi lại phản hồi cho tất cả các client (tài xế)
         sendToAllClients(message.getPayload());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, org.springframework.web.socket.CloseStatus status) throws Exception {
         sessions.remove(session);
-        System.out.println("Connection closed: " + session.getId());
+        System.out.println("Driver disconnected: " + session.getId());
     }
 
-    // Gửi tin nhắn tới tất cả các client
     public void sendToAllClients(String message) {
         for (WebSocketSession session : sessions) {
-            try {
-                if (session.isOpen()) {
+            if (session.isOpen()) {
+                try {
                     session.sendMessage(new TextMessage(message));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }

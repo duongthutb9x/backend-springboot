@@ -63,8 +63,9 @@ public class BookingDTO {
         this.patientUsername = booking.getPatient().getPatientUsername();
     }
 
-    public BookingDTO(Integer bookingId, String patientName, String patientPhone, Double latitude, Double longitude, Double destinationLatitude, Double destinationLongitude) {
+    public BookingDTO(Integer bookingId,Integer patientId, String patientName, String patientPhone, Double latitude, Double longitude, Double destinationLatitude, Double destinationLongitude) {
         this.bookingId = bookingId;
+        this.patientId = patientId;
         this.patientName = patientName;
         this.patientPhone = patientPhone;
         this.latitude = latitude;

@@ -155,7 +155,7 @@ public class BookingController {
             // Lấy thông tin bệnh nhân từ patientId
             Optional<Patients> patient = patientService.findById(booking.getPatient().getPatientId());
 
-            BookingDTO bookingDTO = new BookingDTO(unfinishedBooking.get().getBookingId(), patient.get().getPatientName(), patient.get().getPhoneNumber(),
+            BookingDTO bookingDTO = new BookingDTO(unfinishedBooking.get().getBookingId(),unfinishedBooking.get().getPatient().getPatientId(), patient.get().getPatientName(), patient.get().getPhoneNumber(),
                     unfinishedBooking.get().getLatitude(), unfinishedBooking.get().getLongitude(), unfinishedBooking.get().getDestinationLatitude()
                     , unfinishedBooking.get().getLongitude());
 
