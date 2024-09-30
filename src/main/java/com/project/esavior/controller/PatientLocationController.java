@@ -64,11 +64,21 @@ public class PatientLocationController {
     @GetMapping("/get-driver-location/{driverId}")
     public ResponseEntity<DriverLocation> getDriverLocation(@PathVariable Integer driverId) {
         DriverLocation location = driverLocationService.getDriverLocation(driverId);
+        System.out.println(location.toString());
         if (location != null) {
             System.out.println("Returning location for driverId: " + driverId);
             return new ResponseEntity<>(location, HttpStatus.OK);
         } else {
             System.out.println("No location found for driverId: " + driverId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    @GetMapping("/get-customer-location/{patientId}")
+    public ResponseEntity<PatientLocation> getCustomerLocation(@PathVariable Integer patientId) {
+        PatientLocation location = patientLocationService.getCustomerLocation(patientId);
+        if (location != null) {
+            return new ResponseEntity<>(location, HttpStatus.OK);
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

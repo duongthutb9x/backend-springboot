@@ -69,4 +69,7 @@ public class PatientLocationService {
         // Lưu vào cơ sở dữ liệu
         patientLocationRepository.save(patientLocation);
     }
+    public PatientLocation getCustomerLocation(Integer patientId) {
+        return patientLocationRepository.findByPatientId(patientId);
+    }
 }

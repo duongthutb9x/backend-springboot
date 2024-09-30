@@ -239,6 +239,7 @@ public class DriverController {
 
 
 
+
     @GetMapping("/get-driver-location/{driverId}")
     public ResponseEntity<DriverLocation> getDriverLocation(@PathVariable Integer driverId) {
         DriverLocation driverLocation = driverLocationService.getDriverLocation(driverId);

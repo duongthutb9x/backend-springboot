@@ -36,6 +36,9 @@ public class PatientLocation {
     @Column(name = "updated_at")  // Tên cột là updated_at
     private LocalDateTime updatedAt;
 
+    public PatientLocation() {
+    }
+
     // Getters và Setters
     public Integer getId() {
         return id;

@@ -42,7 +42,10 @@
             <version>8.0.33</version> <!-- Ensure you specify the version -->
         </dependency>
         <!-- JWT -->
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
 
         <!-- Lombok (Nếu bạn cần sử dụng Lombok) -->
         <dependency>
