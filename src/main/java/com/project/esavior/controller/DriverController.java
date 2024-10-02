@@ -224,12 +224,16 @@ public class DriverController {
             // Lấy thông tin khách hàng và tọa độ từ `PatientLocationService`
             Map<String, Object> customerAndLocationInfo = patientLocationService.getPatientAndLocationInfo(booking.getPatient().getPatientId());
 
-            return ResponseEntity.ok(customerAndLocationInfo); // Trả về thông tin khách hàng và tọa độ
+            // Thêm bookingId vào response
+            customerAndLocationInfo.put("bookingId", booking.getBookingId());
+
+            return ResponseEntity.ok(customerAndLocationInfo); // Trả về thông tin khách hàng, tọa độ và bookingId
         } else {
             // Nếu không tìm thấy, trả về no content
             return ResponseEntity.noContent().build();
         }
     }
+
 
 
 
