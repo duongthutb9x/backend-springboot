@@ -67,7 +67,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         String messageType = (String) data.get("type");
         if (messageType == null) {
-            sendErrorResponse(session, "Unknown message type");
+            sendErrorResponse(session, "Unknown message type : " + messageType);
             return;
         }
 
@@ -92,7 +92,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String role = (String) data.get("role");    // Vai trò người gửi (tài xế hoặc khách hàng)
 
         if (roomId == null || message == null || role == null) {
-            sendErrorResponse(session, "Missing required fields");
+            sendErrorResponse(session, "Missing required fields" + roomId + " " + message + "  " +role) ;
             return;
         }
 
