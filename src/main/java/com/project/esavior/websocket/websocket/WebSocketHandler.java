@@ -5,6 +5,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +15,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     // Lưu session của cả tài xế và khách hàng theo ID chung (room ID)
     private final Map<Integer, Map<String, WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
+    private Map<Integer, List<Map<String, Object>>> messageQueue = new HashMap<>();
+
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -40,7 +44,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
         session.sendMessage(new TextMessage(response.toString()));
 
         System.out.println("Kết nối và tạo phòng thành công với ID chung: " + roomId + " và vai trò: " + role);
+
+        // Gửi lại tin nhắn trong hàng đợi (nếu có)
+        sendQueuedMessages(session, roomId);
     }
+
 
 
     private Map<String, String> getQueryParams(String query) {
@@ -90,18 +98,21 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Integer roomId = (Integer) data.get("id");  // ID chung cho cả tài xế và khách hàng
         String message = (String) data.get("message");
         String role = (String) data.get("role");    // Vai trò người gửi (tài xế hoặc khách hàng)
+        System.out.println("id là :" + roomId + " message : " + message + " role : " + role);
 
+        // Kiểm tra các trường hợp thiếu dữ liệu cần thiết
         if (roomId == null || message == null || role == null) {
-            sendErrorResponse(session, "Missing required fields" + roomId + " " + message + "  " +role) ;
+            sendErrorResponse(session, "Missing required fields" + roomId + " " + message + "  " + role);
             return;
         }
 
         // Xác định người nhận dựa trên role
         String recipientRole = role.equals("driver") ? "customer" : "driver";
         WebSocketSession recipientSession = roomSessions.get(roomId).get(recipientRole);  // Lấy session của người nhận
+        System.out.println(recipientSession);
 
         if (recipientSession != null && recipientSession.isOpen()) {
-            // Gửi tin nhắn cho người còn lại
+            // Gửi tin nhắn cho người còn lại nếu họ đang kết nối
             Map<String, Object> response = new HashMap<>();
             response.put("type", "message");
             response.put("from", role);  // Ai là người gửi (tài xế hoặc khách hàng)
@@ -109,7 +120,36 @@ public class WebSocketHandler extends TextWebSocketHandler {
             recipientSession.sendMessage(new TextMessage(response.toString()));
             System.out.println("Gửi tin nhắn từ " + role + " trong room với ID: " + roomId);
         } else {
-            sendErrorResponse(session, "Recipient not connected or session closed");
+            // Lưu tin nhắn vào hàng đợi nếu người nhận chưa kết nối
+            System.out.println("Recipient not connected or session closed. Lưu tin nhắn vào hàng đợi.");
+            List<Map<String, Object>> messages = messageQueue.getOrDefault(roomId, new ArrayList<>());
+
+            // Tạo đối tượng tin nhắn để lưu vào queue
+            Map<String, Object> queuedMessage = new HashMap<>();
+            queuedMessage.put("type", "message");
+            queuedMessage.put("from", role);
+            queuedMessage.put("message", message);
+
+            messages.add(queuedMessage);
+            messageQueue.put(roomId, messages);  // Lưu vào queue
+
+            sendErrorResponse(session, "Recipient not connected, message saved for later.");
+        }
+    }
+
+    // Khi người nhận kết nối lại, gửi tất cả tin nhắn trong hàng đợi
+    private void sendQueuedMessages(WebSocketSession recipientSession, Integer roomId) throws Exception {
+        if (messageQueue.containsKey(roomId)) {
+            List<Map<String, Object>> messages = messageQueue.get(roomId);
+
+            // Gửi tất cả tin nhắn trong hàng đợi
+            for (Map<String, Object> message : messages) {
+                recipientSession.sendMessage(new TextMessage(message.toString()));
+            }
+
+            // Sau khi gửi xong, xóa hàng đợi
+            messageQueue.remove(roomId);
+            System.out.println("Đã gửi tất cả tin nhắn trong hàng đợi cho người nhận.");
         }
     }
 
